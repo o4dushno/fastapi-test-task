@@ -6,11 +6,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.chats import models
 from src.chats import schemas
 from src.chats.crud import (
-    create_chat_room,
-    create_private_chat,
+    create_public_chat_crud,
+    create_private_chat_crud,
     enjoy_user_to_public_chat,
     get_public_chat_by_uuid,
-    get_users_private_chat
+    get_users_private_chat_crud
 )
 from src.chats.utils import create_room_conversation
 from src.core.jwt import get_current_user
@@ -22,7 +22,7 @@ router = APIRouter()
 
 
 @router.post("/private_chat")
-async def create_private_chat_view(
+async def create_private_chat(
     user2: schemas.CreatePrivateChatUser,
     db: AsyncSession = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
@@ -37,7 +37,7 @@ async def create_private_chat_view(
     if second_user is current_user:
         raise BadRequestException(detail="You can't create chat with yourself")
 
-    exists_private_chat = await get_users_private_chat(
+    exists_private_chat = await get_users_private_chat_crud(
         db, [current_user, second_user]
     )
     if exists_private_chat is not None:
@@ -45,7 +45,7 @@ async def create_private_chat_view(
             detail=f"Private chat with user {user2.user2_email} already exists"
         )
 
-    new_chat, conversation = await create_private_chat(
+    new_chat, conversation = await create_private_chat_crud(
         db, [current_user, second_user]
     )
     return {
@@ -55,12 +55,13 @@ async def create_private_chat_view(
 
 
 @router.post("/chat/")
-async def create_chat_room_view(
+async def create_public_chat(
     chatroom: schemas.ChatRoomCreate,
     db: AsyncSession = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
-    public_chat, conversation = await create_chat_room(
+    """Создать публичный чат."""
+    public_chat, conversation = await create_public_chat_crud(
         db, chatroom.chat_name, current_user.id
     )
     return {
@@ -75,7 +76,7 @@ async def enjoy_public_chat(
     db: AsyncSession = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
-    """Вступить в чат."""
+    """Присоединиться к публичному чату."""
     public_chat = await get_public_chat_by_uuid(db, uuid.UUID(chat_id))
     if not public_chat:
         raise NotFoundException(detail="Chat not found")
@@ -95,6 +96,7 @@ async def create_public_chat_conversation(
     db: AsyncSession = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
+    """Создание комнаты в публичном чате."""
     uuid_chat_id = uuid.UUID(chat_id)
     public_chat = await get_public_chat_by_uuid(db, uuid_chat_id)
     if current_user.id not in [user.id for user in public_chat.users]:

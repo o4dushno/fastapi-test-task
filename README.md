@@ -26,7 +26,7 @@ python src/socket_client/client.py
 ## Публичные чаты
 Существуют публичные чаты в которых пользователи могут создавать комнаты.
 По умолчанию к каждому чату автоматически создается комната.
-Создание чата происходит по ссылке [chats](http://localhost:8081/docs#/default/create_chat_room_view_chat__post)
+Создание чата происходит по ссылке [chat](http://localhost:8081/docs#/default/create_public_chat_chat__post)
 В ответ приходит `chat_id` и `conversation_id`.
 Для того чтобы создать комнату, сначала необходимо присоединиться к чату
 по ссылке [`/chat/{chat_id}/enjoy`](http://localhost:8081/docs#/default/enjoy_public_chat_chat__chat_id__enjoy_post) и указать `chat_id`.
@@ -35,7 +35,7 @@ python src/socket_client/client.py
 
 ## Приватные чаты
 Помимо публичных чатов существуют приватные чаты для двух пользователей.
-Для создания приватного чата перейдите в [`/private_chat`](http://localhost:8081/docs#/default/create_private_chat_view_private_chat_post) и укажите email
+Для создания приватного чата перейдите в [`/private_chat`](http://localhost:8081/docs#/default/create_private_chat_private_chat_post) и укажите email
 собеседника.
 
 ## Общение при помощи сокетов.

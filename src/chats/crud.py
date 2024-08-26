@@ -10,7 +10,7 @@ from src.chats.exceptions import GetPrivateChatException
 from src.chats.models import Conversation, PrivateChat, PublicChat
 
 
-async def create_private_chat(db, users: List[User]):
+async def create_private_chat_crud(db, users: List[User]):
     try:
         new_conversation = Conversation(is_group=False)
         db.add(new_conversation)
@@ -27,7 +27,7 @@ async def create_private_chat(db, users: List[User]):
         raise e
 
 
-async def get_users_private_chat(db, users: List[User]):
+async def get_users_private_chat_crud(db, users: List[User]):
     if len(users) != 2:
         raise GetPrivateChatException("Users length must be equals 2")
 
@@ -49,7 +49,7 @@ async def get_users_private_chat(db, users: List[User]):
     return data
 
 
-async def create_chat_room(db, name: str, owner_id: UUID):
+async def create_public_chat_crud(db, name: str, owner_id: UUID):
     new_conversation = Conversation(is_group=True)
     db.add(new_conversation)
     await db.flush()
