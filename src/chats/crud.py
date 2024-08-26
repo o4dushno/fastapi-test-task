@@ -27,26 +27,23 @@ async def create_private_chat_crud(db, users: List[User]):
         raise e
 
 
-async def get_users_private_chat_crud(db, users: List[User]):
+async def users_private_chat_exists(db, users: List[User]) -> bool:
     if len(users) != 2:
         raise GetPrivateChatException("Users length must be equals 2")
 
     user1, user2 = users
-
     subquery = (
         select(PrivateChat.id)
-        .join(PrivateChat.users)
         .filter(PrivateChat.users.any(id=user1.id))
         .filter(PrivateChat.users.any(id=user2.id))
-        .group_by(PrivateChat.id)
-        .having(func.count(PrivateChat.id) == 2)
-        .subquery()
+        .limit(1)
     )
-    query = select(PrivateChat).filter(PrivateChat.id == subquery.c.id)
 
-    private_chat = await db.execute(query)
-    data = private_chat.scalars().first()
-    return data
+    exists_query = select(exists(subquery))
+    result = await db.execute(exists_query)
+    exists_ = result.scalar()
+
+    return exists_
 
 
 async def public_chat_exists(db, name: str):

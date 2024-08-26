@@ -10,8 +10,8 @@ from src.chats.crud import (
     create_private_chat_crud,
     enjoy_user_to_public_chat,
     get_public_chat_by_uuid,
-    get_users_private_chat_crud,
     public_chat_exists,
+    users_private_chat_exists,
 )
 from src.chats.utils import create_room_conversation
 from src.core.jwt import get_current_user
@@ -38,10 +38,11 @@ async def create_private_chat(
     if second_user is current_user:
         raise BadRequestException(detail="You can't create chat with yourself")
 
-    exists_private_chat = await get_users_private_chat_crud(
+    exists_private_chat = await users_private_chat_exists(
         db, [current_user, second_user]
     )
-    if exists_private_chat is not None:
+
+    if exists_private_chat:
         raise BadRequestException(
             detail=f"Private chat with user {user2.user2_email} already exists"
         )
