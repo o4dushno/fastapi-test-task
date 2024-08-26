@@ -45,20 +45,26 @@ async def connect(sid, environ, auth):
 
 
 @sio.event
-async def enter_room(sid, room_id):
+async def enter_room(sid, room_id: str):
+    try:
+        room_uid = uuid.UUID(room_id)
+    except ValueError:
+        await sio.emit('error', to=sid,
+                       data={"message": "Invalid room id format"})
+        return False
     async with SessionFactory() as db:
         # Проверяем что пользователю можно присоединиться к комнате
         if not await have_enter_room_permission(
-            db, connected_users[sid], uuid.UUID(room_id)
+            db, connected_users[sid], room_uid
         ):
             await sio.emit(
                 'error', to=sid,
-                data={"room_id": room_id, "message": "Access denied"},
+                data={"room_id": room_uid, "message": "Access denied"},
             )
             return False
 
-    await sio.enter_room(sid, str(room_id))
-    print(f"User {sid} joined room {room_id}")
+    await sio.enter_room(sid, str(room_uid))
+    print(f"User {sid} joined room {room_uid}")
 
 
 @sio.event

@@ -27,7 +27,7 @@ async def get_dialog_by_conversation_id(db, conversation_id):
     data = conversation.scalars().first()
     if not data:
         return None
-    return data.public_chat or data.private_chat
+    return data.public_chat or data.private_chats
 
 
 async def get_conversation_messages(db, conversation_id):
