@@ -53,7 +53,7 @@ async def create_chat_room_view(
     public_chat, conversation = await create_chat_room(db, chatroom.room_name, current_user.id)
     return {
         "room_id": public_chat.id,
-        "conversations": conversation.id
+        "conversation_id": conversation.id
     }
 
 

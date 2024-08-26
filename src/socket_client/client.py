@@ -67,12 +67,12 @@ async def start_client():
         return
 
     # Присоединяемся к чату
-    result = await sio.call("enter_room", room)
+    result = await sio.call("enter_room", conversation_id)
     if result is None:
         # Ждем получения истории сообщений
-        await sio.call("message_history", room)
-        await send_messages(room)
-        await sio.emit("leave_room", room)
+        await sio.call("message_history", conversation_id)
+        await send_messages(conversation_id)
+        await sio.emit("leave_room", conversation_id)
     await sio.disconnect()
 
 
