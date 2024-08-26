@@ -14,7 +14,7 @@ from src.core.exceptions import AuthFailedException, AuthTokenExpiredException
 from src.database.dependencies import get_db
 
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login/")
 
 
 SUB = "sub"

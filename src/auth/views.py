@@ -7,6 +7,7 @@ from fastapi import (
     HTTPException,
     Response,
 )
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.auth import schemas
@@ -64,12 +65,12 @@ async def register(
 
 @router.post("/login/")
 async def login(
-    data: schemas.UserLogin,
     response: Response,
+    data: OAuth2PasswordRequestForm = Depends(),
     db: AsyncSession = Depends(get_db),
 ):
     user = await models.User.authenticate(
-        db=db, email=data.email, password=data.password
+        db=db, email=data.username, password=data.password
     )
 
     if not user:
@@ -84,7 +85,7 @@ async def login(
 
     add_refresh_token_cookie(response=response, token=token_pair.refresh.token)
 
-    return {"token": token_pair.access.token}
+    return {"access_token": token_pair.access.token, "token_type": "bearer"}
 
 
 @router.get("/verify/", response_model=schemas.SuccessResponseScheme)

@@ -35,11 +35,6 @@ class UserRegister(UserBase):
         return v
 
 
-class UserLogin(BaseModel):
-    email: EmailStr
-    password: str
-
-
 class JwtTokenSchema(BaseModel):
     token: str
     payload: dict
@@ -58,12 +53,6 @@ class SuccessResponseScheme(BaseModel):
 class MailBodySchema(BaseModel):
     token: str
     type: str
-
-
-class EmailSchema(BaseModel):
-    recipients: list[EmailStr]
-    subject: str
-    body: MailBodySchema
 
 
 class MailTaskSchema(BaseModel):
