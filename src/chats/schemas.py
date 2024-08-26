@@ -6,4 +6,4 @@ class CreatePrivateChatUser(BaseModel):
 
 
 class ChatRoomCreate(BaseModel):
-    room_name: str
+    chat_name: str

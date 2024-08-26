@@ -61,10 +61,10 @@ async def create_chat_room_view(
     current_user: models.User = Depends(get_current_user),
 ):
     public_chat, conversation = await create_chat_room(
-        db, chatroom.room_name, current_user.id
+        db, chatroom.chat_name, current_user.id
     )
     return {
-        "room_id": public_chat.id,
+        "chat_id": public_chat.id,
         "conversation_id": conversation.id
     }
 
@@ -102,4 +102,4 @@ async def create_public_chat_conversation(
         raise BadRequestException(detail="You are not a member of this room")
 
     conversation = await create_room_conversation(db, uuid_chat_id)
-    return {"room_id": chat_id, "conversation_id": conversation.id}
+    return {"chat_id": chat_id, "conversation_id": conversation.id}
