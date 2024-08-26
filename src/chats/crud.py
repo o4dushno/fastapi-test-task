@@ -1,7 +1,7 @@
 from uuid import UUID
 from typing import List
 
-from sqlalchemy import select, func
+from sqlalchemy import select, func, exists
 from sqlalchemy.orm import joinedload
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -47,6 +47,13 @@ async def get_users_private_chat_crud(db, users: List[User]):
     private_chat = await db.execute(query)
     data = private_chat.scalars().first()
     return data
+
+
+async def public_chat_exists(db, name: str):
+    result = await db.execute(
+        select(exists().where(PublicChat.name == name))
+    )
+    return result.scalars().first()
 
 
 async def create_public_chat_crud(db, name: str, owner_id: UUID):

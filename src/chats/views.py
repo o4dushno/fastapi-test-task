@@ -10,7 +10,8 @@ from src.chats.crud import (
     create_private_chat_crud,
     enjoy_user_to_public_chat,
     get_public_chat_by_uuid,
-    get_users_private_chat_crud
+    get_users_private_chat_crud,
+    public_chat_exists,
 )
 from src.chats.utils import create_room_conversation
 from src.core.jwt import get_current_user
@@ -61,6 +62,9 @@ async def create_public_chat(
     current_user: models.User = Depends(get_current_user),
 ):
     """Создать публичный чат."""
+    if await public_chat_exists(db, chatroom.chat_name):
+        raise BadRequestException(detail="Chat already exists")
+
     public_chat, conversation = await create_public_chat_crud(
         db, chatroom.chat_name, current_user.id
     )
