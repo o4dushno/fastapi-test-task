@@ -1,4 +1,4 @@
-from typing import List, TypeAlias
+from typing import List
 from uuid import UUID
 
 from src.chats import models
@@ -6,10 +6,9 @@ from src.socket_server import crud
 from src.socket_server.exceptions import SocketPermissionError
 
 
-Dialog: TypeAlias = models.PrivateChat | models.PublicChat
-
-
-def check_dialog_permission(dialog: Dialog | None, user: models.User) -> bool:
+def check_dialog_permission(
+    dialog: crud.Dialog | None, user: models.User
+) -> bool:
     return dialog is not None and (
         isinstance(dialog, models.PublicChat)
         or user.id in [user.id for user in dialog.users]
@@ -20,7 +19,7 @@ async def get_message_history(
     db, user: models.User, conversation_id: UUID
 ) -> List[models.Message] | SocketPermissionError:
 
-    data: Dialog | None = await crud.get_dialog_by_conversation_id(
+    data: models.Dialog | None = await crud.get_dialog_by_conversation_id(
         db, conversation_id
     )
 
@@ -32,7 +31,7 @@ async def get_message_history(
 async def have_enter_room_permission(
     db, user: models.User, conversation_id: UUID
 ) -> bool:
-    data: Dialog | None = await crud.get_dialog_by_conversation_id(
+    data: models.Dialog | None = await crud.get_dialog_by_conversation_id(
         db, conversation_id
     )
     return check_dialog_permission(data, user)

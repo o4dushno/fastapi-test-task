@@ -1,10 +1,19 @@
+from uuid import UUID
+
+from typing import TypeAlias
+
 from sqlalchemy import select
 from sqlalchemy.orm import joinedload
 
 from src.chats import models
 
 
-async def get_conversation_by_id(db, conversation_id):
+Dialog: TypeAlias = models.PrivateChat | models.PublicChat
+
+
+async def get_conversation_by_id(
+    db, conversation_id: UUID
+) -> models.Conversation:
     result = await db.execute(
         select(models.Conversation)
         .where(models.Conversation.id == conversation_id)
@@ -12,7 +21,10 @@ async def get_conversation_by_id(db, conversation_id):
     return result.scalars().first()
 
 
-async def get_dialog_by_conversation_id(db, conversation_id):
+async def get_dialog_by_conversation_id(
+    db, conversation_id: UUID
+) -> Dialog | None:
+
     conversation = await db.execute(
         select(models.Conversation)
         .options(
@@ -30,7 +42,10 @@ async def get_dialog_by_conversation_id(db, conversation_id):
     return data.public_chat or data.private_chats
 
 
-async def get_conversation_messages(db, conversation_id):
+async def get_conversation_messages(
+    db, conversation_id: UUID
+) -> models.Message:
+
     result = await db.execute(
         select(models.Message)
         .where(models.Message.conversation_id == conversation_id)
@@ -39,7 +54,10 @@ async def get_conversation_messages(db, conversation_id):
     return result.scalars().all()
 
 
-async def create_message(db, user, message, conversation_id):
+async def create_message(
+    db, user: models.User, message: str, conversation_id: UUID
+) -> None:
+
     db_message = models.Message(
         user_id=user.id, content=message, conversation_id=conversation_id
     )
