@@ -1,30 +1,27 @@
 from uuid import UUID
-from typing import List
+from typing import List, Tuple
 
-from sqlalchemy import select, func, exists
+from sqlalchemy import select, exists
 from sqlalchemy.orm import joinedload
-from sqlalchemy.exc import SQLAlchemyError
 
 from src.auth.models import User
 from src.chats.exceptions import GetPrivateChatException
 from src.chats.models import Conversation, PrivateChat, PublicChat
 
 
-async def create_private_chat_crud(db, users: List[User]):
-    try:
-        new_conversation = Conversation(is_group=False)
-        db.add(new_conversation)
-        await db.flush()
+async def create_private_chat_crud(
+    db, users: List[User]
+) -> Tuple[PrivateChat, Conversation]:
+    new_conversation = Conversation(is_group=False)
+    db.add(new_conversation)
+    await db.flush()
 
-        new_chat = PrivateChat(conversation=new_conversation)
-        new_chat.users.extend(users)
-        db.add(new_chat)
-        await db.commit()
-        await db.refresh(new_chat)
-        return new_chat, new_conversation
-    except SQLAlchemyError as e:
-        await db.rollback()
-        raise e
+    new_chat = PrivateChat(conversation=new_conversation)
+    new_chat.users.extend(users)
+    db.add(new_chat)
+    await db.commit()
+    await db.refresh(new_chat)
+    return new_chat, new_conversation
 
 
 async def users_private_chat_exists(db, users: List[User]) -> bool:
