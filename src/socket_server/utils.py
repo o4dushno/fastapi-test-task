@@ -19,9 +19,7 @@ async def get_message_history(
     db, user: models.User, conversation_id: UUID
 ) -> List[models.Message] | SocketPermissionError:
 
-    data: models.Dialog | None = await crud.get_dialog_by_conversation_id(
-        db, conversation_id
-    )
+    data = await crud.get_dialog_by_conversation_id(db, conversation_id)
 
     if not check_dialog_permission(data, user):
         return SocketPermissionError("You are not a member of this chat room")
@@ -31,9 +29,7 @@ async def get_message_history(
 async def have_enter_room_permission(
     db, user: models.User, conversation_id: UUID
 ) -> bool:
-    data: models.Dialog | None = await crud.get_dialog_by_conversation_id(
-        db, conversation_id
-    )
+    data = await crud.get_dialog_by_conversation_id(db, conversation_id)
     return check_dialog_permission(data, user)
 
 

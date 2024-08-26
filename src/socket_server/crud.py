@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from typing import TypeAlias
+from typing import TypeAlias, List
 
 from sqlalchemy import select
 from sqlalchemy.orm import joinedload
@@ -44,7 +44,7 @@ async def get_dialog_by_conversation_id(
 
 async def get_conversation_messages(
     db, conversation_id: UUID
-) -> models.Message:
+) -> List[models.Message]:
 
     result = await db.execute(
         select(models.Message)
