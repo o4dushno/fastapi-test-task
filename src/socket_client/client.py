@@ -54,10 +54,14 @@ async def send_messages(room):
 
 async def start_client():
     token = input("Token:\n")
-    room = "7cac8e7f966f45dd9ec376f45e67f9d4"
+    room = input("ID комнаты:\n")
 
     try:
-        await sio.connect('http://localhost:8081/', auth={"token": token})
+        await sio.connect(
+            'http://localhost:8081/',
+            auth={"token": token},
+            socketio_path='/ws/socket.io/',
+        )
     except socketio.exceptions.ConnectionError:
         print("Failed to connect to socket.io server")
         return
