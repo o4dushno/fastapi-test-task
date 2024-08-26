@@ -10,6 +10,7 @@ from src.chats.crud import (
     create_private_chat,
     enjoy_user_to_public_chat,
     get_public_chat_by_uuid,
+    get_users_private_chat
 )
 from src.chats.utils import create_room_conversation
 from src.core.jwt import get_current_user
@@ -27,7 +28,6 @@ async def create_private_chat_view(
     current_user: models.User = Depends(get_current_user),
 ):
     """Создать приватный чат с пользователем."""
-    # TODO Запретить создавать диалог повторно
     second_user = await models.User.find_by_email(
         db=db, email=user2.user2_email
     )
@@ -37,10 +37,20 @@ async def create_private_chat_view(
     if second_user is current_user:
         raise BadRequestException(detail="You can't create chat with yourself")
 
-    new_chat = await create_private_chat(db, [current_user, second_user])
+    exists_private_chat = await get_users_private_chat(
+        db, [current_user, second_user]
+    )
+    if exists_private_chat is not None:
+        raise BadRequestException(
+            detail=f"Private chat with user {user2.user2_email} already exists"
+        )
+
+    new_chat, conversation = await create_private_chat(
+        db, [current_user, second_user]
+    )
     return {
         "chat_id": new_chat.id,
-        "conversation_id": new_chat.conversation_id
+        "conversation_id": conversation.id
     }
 
 
@@ -50,7 +60,9 @@ async def create_chat_room_view(
     db: AsyncSession = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
-    public_chat, conversation = await create_chat_room(db, chatroom.room_name, current_user.id)
+    public_chat, conversation = await create_chat_room(
+        db, chatroom.room_name, current_user.id
+    )
     return {
         "room_id": public_chat.id,
         "conversation_id": conversation.id
