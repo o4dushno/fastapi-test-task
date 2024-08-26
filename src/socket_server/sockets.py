@@ -2,6 +2,7 @@ import socketio
 import uuid
 
 from src.core.jwt import get_current_user
+from src.core.logging import logger
 from src.database.database import SessionFactory
 from src.socket_server.exceptions import (
     SocketPermissionError,
@@ -34,7 +35,7 @@ async def connect(sid, environ, auth):
             if not user:
                 raise SocketUserNotFoundError()
         except Exception as e:
-            print(f"Authentication failed: {e}")
+            logger.debug(f"Authentication failed: {e}")
             await sio.emit(
                 'error', to=sid, data={"message": "Authentication failed"}
             )
@@ -59,12 +60,13 @@ async def enter_room(sid, room_id: str):
         ):
             await sio.emit(
                 'error', to=sid,
-                data={"room_id": room_uid, "message": "Access denied"},
+                data={"room_id": room_id, "message": "Access denied"},
             )
             return False
 
     await sio.enter_room(sid, str(room_uid))
-    print(f"User {sid} joined room {room_uid}")
+    logger.info("User %(sid)s joined room %(room_uid)s" % {
+        "sid": sid, "room_uid": room_uid})
 
 
 @sio.event
@@ -120,4 +122,4 @@ async def message_history(sid, room_id):
 async def disconnect(sid):
     if sid in connected_users:
         del connected_users[sid]
-    print(f"User disconnected: {sid}")
+    logger.info("User disconnected: %(sid)s" % {"sid": sid})
