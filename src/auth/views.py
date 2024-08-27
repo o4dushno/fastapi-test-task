@@ -7,11 +7,11 @@ from fastapi import (
     HTTPException,
     Response,
 )
-from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.auth import schemas
 from src.chats import models
+from src.auth.forms import OAuth2PasswordRequestCustomForm
 from src.core.hash import get_password_hash
 from src.core.jwt import (
     create_token_pair,
@@ -32,7 +32,12 @@ from src.auth.tasks import user_mail_event
 router = APIRouter()
 
 
-@router.post("/register/", response_model=schemas.User)
+@router.post(
+    "/register/",
+    tags=['auth'],
+    response_model=schemas.User,
+    summary="Регистрация пользователя",
+)
 async def register(
     data: schemas.UserRegister,
     bg_task: BackgroundTasks,
@@ -63,10 +68,15 @@ async def register(
     return user_schema
 
 
-@router.post("/login/")
+@router.post(
+    "/login/",
+    tags=['auth'],
+    response_model=schemas.TokenScheme,
+    summary="Авторизация пользователя",
+)
 async def login(
     response: Response,
-    data: OAuth2PasswordRequestForm = Depends(),
+    data: OAuth2PasswordRequestCustomForm = Depends(),
     db: AsyncSession = Depends(get_db),
 ):
     user = await models.User.authenticate(
@@ -88,7 +98,12 @@ async def login(
     return {"access_token": token_pair.access.token, "token_type": "bearer"}
 
 
-@router.get("/verify/", response_model=schemas.SuccessResponseScheme)
+@router.get(
+    "/verify/",
+    tags=['auth'],
+    response_model=schemas.SuccessResponseScheme,
+    summary="Верификация пользователя",
+)
 async def verify(token: str, db: AsyncSession = Depends(get_db)):
     payload = await decode_access_token(token=token, db=db)
     user = await models.User.find_by_id(db=db, id=uuid.UUID(payload[SUB]))

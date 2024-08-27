@@ -22,13 +22,17 @@ from src.database.dependencies import get_db
 router = APIRouter()
 
 
-@router.post("/private_chat")
+@router.post(
+    "/private_chat",
+    tags=['chats'],
+    summary="Создать приватный чат с пользователем",
+    response_model=schemas.ChatConversationResponse,
+)
 async def create_private_chat(
     user2: schemas.CreatePrivateChatUser,
     db: AsyncSession = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
-    """Создать приватный чат с пользователем."""
     second_user = await models.User.find_by_email(
         db=db, email=user2.user2_email
     )
@@ -56,13 +60,17 @@ async def create_private_chat(
     }
 
 
-@router.post("/chat/")
+@router.post(
+    "/chat/",
+    tags=['chats'],
+    summary="Создать публичный чат",
+    response_model=schemas.ChatConversationResponse,
+)
 async def create_public_chat(
     chatroom: schemas.ChatRoomCreate,
     db: AsyncSession = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
-    """Создать публичный чат."""
     if await public_chat_exists(db, chatroom.chat_name):
         raise BadRequestException(detail="Chat already exists")
 
@@ -75,13 +83,16 @@ async def create_public_chat(
     }
 
 
-@router.post("/chat/{chat_id}/enjoy")
+@router.post(
+    "/chat/{chat_id}/enjoy",
+    tags=['chats'],
+    summary="Присоединиться к публичному чату",
+)
 async def enjoy_public_chat(
     chat_id: str,
     db: AsyncSession = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
-    """Присоединиться к публичному чату."""
     public_chat = await get_public_chat_by_uuid(db, uuid.UUID(chat_id))
     if not public_chat:
         raise NotFoundException(detail="Chat not found")
@@ -95,13 +106,17 @@ async def enjoy_public_chat(
     return Response()
 
 
-@router.post("/chat/{chat_id}/create_conversation")
+@router.post(
+    "/chat/{chat_id}/create_conversation",
+    tags=['chats'],
+    summary="Создать комнату в публичном чате",
+    response_model=schemas.ChatConversationResponse,
+)
 async def create_public_chat_conversation(
     chat_id: str,
     db: AsyncSession = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
-    """Создание комнаты в публичном чате."""
     uuid_chat_id = uuid.UUID(chat_id)
     public_chat = await get_public_chat_by_uuid(db, uuid_chat_id)
     if current_user.id not in [user.id for user in public_chat.users]:

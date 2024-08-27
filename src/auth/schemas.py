@@ -46,6 +46,11 @@ class TokenPair(BaseModel):
     refresh: JwtTokenSchema
 
 
+class TokenScheme(BaseModel):
+    access_token: str
+    token_type: str
+
+
 class SuccessResponseScheme(BaseModel):
     msg: str
 
